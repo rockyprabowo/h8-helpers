@@ -1,5 +1,10 @@
 package set
 
+import (
+	"golang.org/x/exp/constraints"
+	"sort"
+)
+
 // Set implementation using a map of struct{}s.
 //
 // The map is used to store the set's elements. The struct{} is an empty type,
@@ -7,8 +12,8 @@ package set
 // the map's key is present.
 //
 // The Set type is generic, which means it can be used to create sets of any
-// comparable type.
-type Set[T comparable] struct {
+// constraint.Ordered type.
+type Set[T constraints.Ordered] struct {
 	sets map[T]struct{}
 }
 
@@ -52,15 +57,27 @@ func (s *Set[T]) Size() int {
 	return len(s.sets)
 }
 
+// ToSlice returns a sorted slice of the set
+func (s *Set[T]) ToSlice() []T {
+	var slice []T
+	for key := range s.sets {
+		slice = append(slice, key)
+	}
+	sort.SliceStable(slice, func(i, j int) bool {
+		return slice[i] < slice[j]
+	})
+	return slice
+}
+
 // NewSet creates a new set of type T
-func NewSet[T comparable]() *Set[T] {
+func NewSet[T constraints.Ordered]() *Set[T] {
 	s := &Set[T]{}
 	s.sets = make(map[T]struct{})
 	return s
 }
 
 // NewSetFromSlice creates a new set of type T
-func NewSetFromSlice[T comparable](slice []T) *Set[T] {
+func NewSetFromSlice[T constraints.Ordered](slice []T) *Set[T] {
 	s := &Set[T]{}
 	s.sets = make(map[T]struct{})
 	s.AddMany(slice...)

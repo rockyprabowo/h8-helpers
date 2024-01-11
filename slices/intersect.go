@@ -7,20 +7,18 @@ import (
 
 // Intersect
 // Returns the intersection of two slice with a type of T without the duplicates.
-func Intersect[T constraints.Ordered](a, b []T) (diff []T) {
+func Intersect[T constraints.Ordered](a, b []T) []T {
+	intersectSet := set.NewSet[T]()
 	long, short := SliceLongShort(a, b)
 
-	sets := set.NewSet[T]()
+	shortSet := set.NewSetFromSlice[T](short)
+	longSlice := set.NewSetFromSlice[T](long).ToSlice()
 
-	for _, v := range short {
-		sets.Add(v)
-	}
-
-	for _, v := range long {
-		if sets.Has(v) {
-			diff = append(diff, v)
+	for i := range longSlice {
+		if shortSet.Has(longSlice[i]) {
+			intersectSet.Add(longSlice[i])
 		}
 	}
 
-	return
+	return intersectSet.ToSlice()
 }
